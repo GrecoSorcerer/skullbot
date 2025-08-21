@@ -37,7 +37,7 @@ try:
 
     # Try to get active threads in our discord server
     resp_json = discord_client.get_active_threads(
-        discord_server_id = getenv("DISCORD_ESCARPMENT_SERVER_ID"),
+        discord_server_id = getenv("DISCORD_SERVER_ID"),
         discord_api_key = getenv("DISCORDBOT_KEY")
     )
 except Exception as e:

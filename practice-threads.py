@@ -3,6 +3,16 @@ from requests import request
 from pprint import pprint
 import datetime
 
+from discord.client import DiscordClient
+
+discord_client = DiscordClient()
+
+from discord.discord_logging import (
+    EXCEPTION_MSG,
+    DISCORD_API_LOG_MSG,
+    log_timestamp
+)
+
 print("[Create Practice Threads Start]")
 
 today = datetime.date.today()
@@ -10,17 +20,6 @@ today = datetime.date.today()
 TODAY = today
 # Get today as a string
 NOW = f"{TODAY.strftime('%d/%m/%Y - %H:%M:%S')}"
-
-
-LOG_MSG_HEAD = \
-    "---\n" \
-    "[{NOW}]"
-EXCEPTION_MSG = \
-    LOG_MSG_HEAD +\
-    "Exception: {e}"
-DISCORD_API_LOG_MSG = \
-    LOG_MSG_HEAD +\
-    "Discord Resp.: {resp}"
 
 tuesday = today # Assume today is tuesday
 
@@ -45,20 +44,16 @@ payloads = [
     },
 ]
 # pprint(payloads)
-for payload in payloads:
+for new_thread_meta in payloads:
     try:
-        response = request(
-            method="POST",
-            headers={
-                "Authorization": f"Bot {getenv('DISCORDBOT_KEY')}",
-                "Content-Type": "application/json"
-            },
-            url=f"https://discord.com/api/v10/channels/{getenv("DISCORD_THREAD_CHANNEL_ID")}/threads",
-            json=payload
+        resp = discord_client.create_thread(
+            discord_api_key=getenv('DISCORDBOT_KEY'),
+            discord_thread_channel_id=getenv("DISCORD_THREAD_CHANNEL_ID"),
+            new_thread=new_thread_meta
         )
         print(DISCORD_API_LOG_MSG.format(
-            NOW=NOW,
-            response=response.json()
+            NOW=log_timestamp(),
+            resp=resp.json()
         ))
     except Exception as e:
         print(EXCEPTION_MSG.format(

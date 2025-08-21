@@ -14,15 +14,15 @@ LOG_MSG = \
 
 EXCEPTION_MSG = \
     LOG_MSG_HEAD +\
-    "Exception: {e}"
+    " Exception: {e}"
 
 DISCORD_API_LOG_MSG = \
     LOG_MSG_HEAD +\
-    "Discord Resp.: {resp}"
+    " Discord Resp.: {resp}"
 
 PARSE_THREADS_LOG_MSG = \
     LOG_MSG_HEAD +\
-    "Parsing Thread [{name}] Nofity Date -> {practice_timestamp_as_date} {past_present_future}"
+    " Parsing Thread [{name}] Nofity Date -> {practice_timestamp_as_date} {past_present_future}"
 
 
 def label_past_present_or_future(today, timestamp):

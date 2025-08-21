@@ -8,6 +8,18 @@ from .discord_logging import (
 
 class DiscordClient:
 
+    def create_thread(self, discord_api_key, discord_thread_channel_id, new_thread):
+        resp = request(
+            method="POST",
+            headers={
+                "Authorization": f"Bot {discord_api_key}",
+                "Content-Type": "application/json"
+            },
+            url=f"https://discord.com/api/v10/channels/{discord_thread_channel_id}/threads",
+            json=new_thread
+        )
+        return resp.json()
+
     def get_active_threads(self, discord_api_key, discord_server_id):
         resp = request(
             method="GET",
