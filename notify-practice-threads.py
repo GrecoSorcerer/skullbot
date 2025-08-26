@@ -1,11 +1,14 @@
 from os import getenv
-from pprint import pprint
+from pprint import pprint, pformat
 from datetime import datetime, timedelta
 
 from weathergov.client import WeatherGovClient
 from discord.client import DiscordClient
 
 # CONSTANTS (hint: check init files)
+from core.core_logging import (
+    log_timestamp
+)
 from discord import (
     THREAD_NOTIFICATION_MSG_TEMPLATE
 )
@@ -14,7 +17,6 @@ from discord.discord_logging import (
     PARSE_THREADS_LOG_MSG,
     DISCORD_API_LOG_MSG,
     LOG_MSG,
-    log_timestamp,
     label_past_present_or_future
 )
 
@@ -27,17 +29,19 @@ TODAY = datetime.today()
 NOW = f"{TODAY.strftime('%d/%m/%Y - %H:%M:%S')}"
 
 # Start logging for debug purposes
-print("[Notify Practice Threads Start]")
+print(LOG_MSG.format(
+    NOW = log_timestamp(),
+    LOG_MSG_BODY="[Notify Practice Threads START]"
+))
 print(LOG_MSG.format(
     NOW = log_timestamp(),
     LOG_MSG_BODY="Getting Active Threads..."
 ))
 
 try:
-
     # Try to get active threads in our discord server
     resp_json = discord_client.get_active_threads(
-        discord_server_id = getenv("DISCORD_SERVER_ID"),
+        discord_server_id = getenv("DISCORD_ESCARPMENT_SERVER_ID"),
         discord_api_key = getenv("DISCORDBOT_KEY")
     )
 except Exception as e:
@@ -61,7 +65,6 @@ saturday = thursday + timedelta(days=2)
 next_monday = thursday + timedelta(days=6)
 
 # Get the active threads from the json response
-pprint(resp_json)
 threads = resp_json["threads"]
 
 print(LOG_MSG.format(
@@ -94,7 +97,6 @@ for thread in threads:
             # Given "MM/DD/YYYY" -> ["MM","DD","YYYY"]
             practice_date_parts = practice_date.split("/")
 
-
             # Check year part of practice_date_parts and covert it 
             # to an int to construct datetime `practice_date_as_timestamp`
             if len(practice_date_parts[2]) == 4:
@@ -113,15 +115,14 @@ for thread in threads:
 
             # Log parse event for thread within filter
             print(PARSE_THREADS_LOG_MSG.format(
-                NOW = NOW, 
+                NOW = log_timestamp(), 
                 practice_timestamp_as_date = practice_date_as_timestamp.date(), 
                 name = name,
                 past_present_future = label_past_present_or_future(TODAY, practice_date_as_timestamp)
             ))
-            # pprint(resp.json())
         except Exception as e:
             print(EXCEPTION_MSG.format(
-                NOW = NOW,
+                NOW = log_timestamp(),
                 e = e.__str__()
             ))
             continue
@@ -138,7 +139,7 @@ for thread in threads:
                     gridX = getenv("WEATHERGOV_GRIDX"),
                     gridY = getenv("WEATHERGOV_GRIDY")
                 )
-                # pprint(forecasts)
+
                 # Format Threads Notification Message Content
                 content = THREAD_NOTIFICATION_MSG_TEMPLATE.format(
                     forecast_now_name=forecasts["properties"]["periods"][0]["name"],
@@ -153,18 +154,15 @@ for thread in threads:
                     thread = thread,
                     message_content = content
                 )
-
-                # Log Discord API Response.
-                print(DISCORD_API_LOG_MSG.format(
-                    NOW=NOW,
-                    resp=resp_json
-                ))
             except Exception as e:
                 print(EXCEPTION_MSG.format(
-                    NOW=NOW,
+                    NOW=log_timestamp(),
                     e=e.__str__()
                 ))
                 continue
 
 # End debug logging
-print("[Notify Practice Threads END]") 
+print(LOG_MSG.format(
+    NOW = log_timestamp(),
+    LOG_MSG_BODY="[Notify Practice Threads END]"
+))

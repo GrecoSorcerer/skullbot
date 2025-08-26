@@ -1,8 +1,9 @@
 from requests import request
+from pprint import pformat
 # from os import getenv
 # from pprint import pprint
 from .discord_logging import (
-    LOG_MSG,
+    DISCORD_API_LOG_MSG,
     log_timestamp
 )
 
@@ -18,7 +19,16 @@ class DiscordClient:
             url=f"https://discord.com/api/v10/channels/{discord_thread_channel_id}/threads",
             json=new_thread
         )
-        return resp.json()
+        
+        resp_json = resp.json()
+
+        # Log Discord API Response.
+        print(DISCORD_API_LOG_MSG.format(
+            NOW=log_timestamp(),
+            label="create_thread",
+            resp=pformat(resp_json, indent=4)
+        ))
+        return resp_json
 
     def get_active_threads(self, discord_api_key, discord_server_id):
         resp = request(
@@ -32,11 +42,21 @@ class DiscordClient:
         # print(resp.status_code)
         # pprint(resp.json())
         if resp.status_code != 200:
-            print(LOG_MSG.format(
+            print(DISCORD_API_LOG_MSG.format(
                 NOW = log_timestamp(),
-                LOG_MSG_BODY=f"Failed to get threads. Request failed, {resp.json()["message"]}."
+                label="get_active_threads",
+                resp=f"Failed to get threads. Request failed,\n{resp.json()["message"]}."
             ))
-        return resp.json()
+        
+        resp_json = resp.json()
+
+        # Log Discord API Response.
+        print(DISCORD_API_LOG_MSG.format(
+            NOW=log_timestamp(),
+            label="get_active_threads",
+            resp="Object filtered, showing 'threads'...\n"+pformat(resp_json["threads"], indent=4)
+        ))
+        return resp_json
     
 
     def message_thread(self, discord_api_key, thread, message_content):
@@ -51,8 +71,16 @@ class DiscordClient:
                 "content": message_content,
             }
         )
+        
+        resp_json = resp.json()
 
-        return resp.json()
+        # Log Discord API Response.
+        print(DISCORD_API_LOG_MSG.format(
+            NOW=log_timestamp(),
+            label="message_thread",
+            resp=pformat(resp_json, indent=4)
+        ))
+        return resp_json
 
 # discord_client = DiscordClient()
 # resp = discord_client.get_active_threads(

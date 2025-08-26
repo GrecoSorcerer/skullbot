@@ -9,11 +9,15 @@ discord_client = DiscordClient()
 
 from discord.discord_logging import (
     EXCEPTION_MSG,
-    DISCORD_API_LOG_MSG,
+    LOG_MSG,
     log_timestamp
 )
 
-print("[Create Practice Threads Start]")
+# Report start of logging
+print(LOG_MSG.format(
+    NOW = log_timestamp(),
+    LOG_MSG_BODY="[Create Practice Threads START]"
+))
 
 today = datetime.date.today()
 # Get the current day
@@ -28,9 +32,12 @@ if today.strftime("%A") != "Tuesday":
     # creation day.
     tuesday = today + datetime.timedelta(days=1-today.weekday()) 
 
+# Get Saturday, offset from this Tuesday
 saturday = tuesday + datetime.timedelta(days=4)
+# Get Next Monday, offset from this Tuesday
 next_monday = tuesday + datetime.timedelta(days=6)
 
+# The practice threads to be created
 payloads = [
     {
         "name": f"Saturday Practice {saturday.strftime('%m/%d/%Y')}",
@@ -43,23 +50,25 @@ payloads = [
         "type": 11  # 11 is for public threads
     },
 ]
-# pprint(payloads)
+
+# For each thread to create (`new_thread_meta`) in `payloads`
 for new_thread_meta in payloads:
     try:
-        resp = discord_client.create_thread(
+        # Call our Discord client to create the thread.
+        resp_json = discord_client.create_thread(
             discord_api_key=getenv('DISCORDBOT_KEY'),
             discord_thread_channel_id=getenv("DISCORD_THREAD_CHANNEL_ID"),
             new_thread=new_thread_meta
         )
-        print(DISCORD_API_LOG_MSG.format(
-            NOW=log_timestamp(),
-            resp=resp.json()
-        ))
     except Exception as e:
+        # Something happened, log it.
         print(EXCEPTION_MSG.format(
-            NOW=NOW,
+            NOW=log_timestamp(),
             e=e
         ))
 
-
-print("[Create Practice Threads End]")
+# Report end of logging
+print(LOG_MSG.format(
+    NOW = log_timestamp(),
+    LOG_MSG_BODY="[Create Practice Threads END]"
+))

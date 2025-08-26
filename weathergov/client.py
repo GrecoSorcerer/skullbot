@@ -1,6 +1,9 @@
 from requests import request
-from pprint import pprint
-
+from pprint import pprint, pformat
+from .weathergov_logging import (
+    WEATHERGOV_API_RESPONSE,
+    log_timestamp
+)
 
 class WeatherGovClient:
 
@@ -13,7 +16,15 @@ class WeatherGovClient:
                 "Accept":"application/geo json"
             }
         )
-        return resp.json()
+        
+        resp_json = resp.json()
+
+        # Log Discord API Response.
+        print(WEATHERGOV_API_RESPONSE.format(
+            NOW=log_timestamp(),
+            resp=pformat(resp_json)
+        ))
+        return resp_json
     
     def get_forecast(self, gridId, gridX, gridY):
         resp = request(
@@ -23,7 +34,15 @@ class WeatherGovClient:
                 "Accept":"application/json"
             }
         )
-        return resp.json()
+        
+        resp_json = resp.json()
+
+        # Log Discord API Response.
+        print(WEATHERGOV_API_RESPONSE.format(
+            NOW=log_timestamp(),
+            resp=pformat(resp_json)
+        ))
+        return resp_json
 
 # wg_Client = WeatherGovClient()
 # points_data = wg_Client.get_points("42.929459","-78.871376")
