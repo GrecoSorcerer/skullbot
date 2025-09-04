@@ -8,5 +8,11 @@ from core.core_logging import (
 
 WEATHERGOV_API_RESPONSE = \
     LOG_MSG_HEAD +\
-    " Weather.GOV Resp. {resp}" +\
+    " Weather.GOV Resp.\n{resp}" +\
     LOG_MSG_FOOT
+
+WEATHERGOV_LOG_PERIOD_HEADER =\
+    " Forecasts..                Name | Detailed Forecast\n"
+
+WEATHERGOV_LOG_PERIOD = \
+    "{period_name:>32} | {period_detailed_forecast:<}"

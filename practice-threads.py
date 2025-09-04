@@ -47,19 +47,48 @@ payloads = [
     {
         "name": f"Monday Practice {next_monday.strftime('%m/%d/%Y')}",
         "auto_archive_duration": 10080,
-        "type": 11  # 11 is for public threads
+        "type": 11,  # 11 is for public threads
+        "message":{
+            "content": "Be mindful, we meet at the same time and place as Flownight; Parking can be hard to find later in the night.",
+            "embeds": [{
+                "image": {
+                    "url": "https://media.discordapp.net/attachments/1409945513998024704/1412071305150468127/image.png?ex=68b6f562&is=68b5a3e2&hm=80f4636e343c7c4a8c1a993e282af1dc3a31cc2cceaa4811014ace6c9901a218&=&format=webp&quality=lossless"
+                }
+            }]
+        }
     },
 ]
 
 # For each thread to create (`new_thread_meta`) in `payloads`
 for new_thread_meta in payloads:
+    # try to send the message first, this will 
     try:
         # Call our Discord client to create the thread.
-        resp_json = discord_client.create_thread(
-            discord_api_key=getenv('DISCORDBOT_KEY'),
-            discord_thread_channel_id=getenv("DISCORD_THREAD_CHANNEL_ID"),
-            new_thread=new_thread_meta
-        )
+        if new_thread_meta.get("message", False):
+            # Sending messages uses the same call as threads, at some point 
+            # I will rename message_thread or create a version for channels only
+            resp_json = discord_client.message_thread(
+                discord_api_key=getenv('DISCORDBOT_KEY'),
+                thread={"id":getenv("DISCORD_THREAD_CHANNEL_ID")},
+                message_content=new_thread_meta.get("message")
+            )
+
+            # Creating the new thread from the message we just created.
+            resp_json = discord_client.create_thread_from_message(
+                discord_api_key=getenv('DISCORDBOT_KEY'),
+                discord_thread_channel_id=getenv("DISCORD_THREAD_CHANNEL_ID"),
+                message_id=resp_json["id"],
+                new_thread_name=new_thread_meta["name"]
+            )
+
+        else:
+            # There was no initial message, so just create a thread.
+            resp_json = discord_client.create_thread(
+                discord_api_key=getenv('DISCORDBOT_KEY'),
+                discord_thread_channel_id=getenv("DISCORD_THREAD_CHANNEL_ID"),
+                new_thread=new_thread_meta
+            )
+            
     except Exception as e:
         # Something happened, log it.
         print(EXCEPTION_MSG.format(

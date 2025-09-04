@@ -1,9 +1,13 @@
 from requests import request
 from pprint import pprint, pformat
+
 from .weathergov_logging import (
     WEATHERGOV_API_RESPONSE,
+    WEATHERGOV_LOG_PERIOD,
+    WEATHERGOV_LOG_PERIOD_HEADER,
     log_timestamp
 )
+
 
 class WeatherGovClient:
 
@@ -20,10 +24,10 @@ class WeatherGovClient:
         resp_json = resp.json()
 
         # Log Discord API Response.
-        print(WEATHERGOV_API_RESPONSE.format(
-            NOW=log_timestamp(),
-            resp=pformat(resp_json)
-        ))
+        # print(WEATHERGOV_API_RESPONSE.format(
+        #     NOW=log_timestamp(),
+        #     resp=pformat(resp_json)
+        # ))
         return resp_json
     
     def get_forecast(self, gridId, gridX, gridY):
@@ -38,10 +42,25 @@ class WeatherGovClient:
         resp_json = resp.json()
 
         # Log Discord API Response.
+        # # Raw response logging
+        # print(WEATHERGOV_API_RESPONSE.format(
+        #     NOW=log_timestamp(),
+        #     resp=pformat(resp_json)
+        # ))
+
+        log_period = [
+            WEATHERGOV_LOG_PERIOD.format(
+                period_name = period["name"],
+                period_detailed_forecast = period["detailedForecast"]
+            ) for period in resp_json["properties"]["periods"]
+        ]
+
         print(WEATHERGOV_API_RESPONSE.format(
             NOW=log_timestamp(),
-            resp=pformat(resp_json)
+            label="get_forecast",
+            resp=WEATHERGOV_LOG_PERIOD_HEADER+"\n".join(log_period)
         ))
+
         return resp_json
 
 # wg_Client = WeatherGovClient()

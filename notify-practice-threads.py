@@ -66,7 +66,8 @@ next_monday = thursday + timedelta(days=6)
 
 # Get the active threads from the json response
 threads = resp_json["threads"]
-
+# initialize to true, and we set to False when/if we find a thread for today (For Logging)
+_no_threads_for_week_flag = True
 print(LOG_MSG.format(
     NOW = log_timestamp(),
     LOG_MSG_BODY ="Checking this weeks threads..."
@@ -85,6 +86,9 @@ for thread in threads:
     # If the active thread is from within the last week
     if ((TODAY-timestamp).days.as_integer_ratio()[0] <= 7
         and thread["parent_id"] == getenv("DISCORD_THREAD_CHANNEL_ID")):
+
+        # There are threads for this week, ensure the flag is set. (For Logging)
+        _no_threads_for_week_flag = False
 
         # Get the thread name 
         # Expected: "Practice name MM/DD/YYYY" or "Practice Name MM/DD/YY"
@@ -125,7 +129,6 @@ for thread in threads:
                 NOW = log_timestamp(),
                 e = e.__str__()
             ))
-            continue
 
         # If there is a Practice Thread for today
         if practice_date_as_timestamp.date() == TODAY.date():
@@ -142,24 +145,27 @@ for thread in threads:
 
                 # Format Threads Notification Message Content
                 content = THREAD_NOTIFICATION_MSG_TEMPLATE.format(
-                    forecast_now_name=forecasts["properties"]["periods"][0]["name"],
-                    forecast_now=forecasts["properties"]["periods"][0]["detailedForecast"],
-                    forecast_later_name=forecasts["properties"]["periods"][1]["name"],
-                    forecast_later=forecasts["properties"]["periods"][1]["detailedForecast"]
+                    forecast_now_name = forecasts["properties"]["periods"][0]["name"],
+                    forecast_now = forecasts["properties"]["periods"][0]["detailedForecast"],
+                    forecast_later_name = forecasts["properties"]["periods"][1]["name"],
+                    forecast_later = forecasts["properties"]["periods"][1]["detailedForecast"]
                 )
 
                 # Send notification message to today's thread.
                 resp_json = discord_client.message_thread(
                     discord_api_key = getenv("DISCORDBOT_KEY"),
                     thread = thread,
-                    message_content = content
+                    message_content = {"content":content}
                 )
             except Exception as e:
+                # Something happened, log it.
                 print(EXCEPTION_MSG.format(
                     NOW=log_timestamp(),
                     e=e.__str__()
                 ))
-                continue
+# QoL Log if no threads for today, log it explicitly.
+if _no_threads_for_week_flag:
+    print(" No threads for this week.\n")
 
 # End debug logging
 print(LOG_MSG.format(

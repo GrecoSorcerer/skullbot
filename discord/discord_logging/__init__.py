@@ -18,6 +18,11 @@ PARSE_THREADS_LOG_MSG = \
     " Parsing Thread [{name}] Nofity Date -> {practice_timestamp_as_date} {past_present_future}" +\
     LOG_MSG_FOOT
 
+DISCORD_LOG_THREAD_HEADER =\
+    " Thread...                                         Name |  Archived | Type | Parent Id\n"
+
+DISCORD_LOG_THREAD = \
+    "{thread_name:>55} | {thread_archival_status!s:>9} | {thread_type:^4} | {thread_parent_id:>16}"
 
 def label_past_present_or_future(today, timestamp):
     # Returns the label for tagging threads in logs.
